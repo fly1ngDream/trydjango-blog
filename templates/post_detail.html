@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+
+{% load urlify %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}{{ object.title }} | {{ block.super }}{% endblock title %}
+
+
+{% block post_detail_link %}
+<li class="breadcrumb-item" aria-current="page">
+    {{ object.title }}
+</li>
+{% endblock post_detail_link %}
+
+
+{% block content %}
+    <div class="col-md-6 mx-auto">
+        {% if object.image %}
+            <img src="{{ object.image.url }}" class="img-fluid" />
+            <hr/>
+        {% endif %}
+        <h1>{{ object.title }} <small>{{ object.timestamp }}</small></h1>
+        <hr/>
+
+        <p>
+            Read time: {% if object.read_time <= 1 %} < 1 min. {% else %}{{ object.read_time }} min.{% endif %}
+        </p>
+
+        <p>
+            Author: {{ object.user }}
+        </p>
+
+        <p><div class="fb-like" data-href="{{ request.build_absolute_uri }}" data-layout="button_count" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div></p>
+
+        <hr/>
+
+        <div class="post-detail-item">{{ object.get_markdown|linebreaks }}</div>
+
+        <hr/>
+        <br/>
+
+        <div>
+            <p class="lead">
+                Comments
+            </p>
+
+            {% if user.is_authenticated %}
+                <form method="POST" action=".">{% csrf_token %}
+                    {{ comment_form|crispy }}
+                    <input class="btn btn-primary" type="submit" value="Post comment"/>
+                </form>
+            {% else %}
+                <hr/>
+                <p>
+                    You must login to comment
+                </p>
+                <hr/>
+            {% endif %}
+
+            {% for comment in comments %}
+                <blockquote>
+                    <p>
+                        {{ comment.content }}
+                    </p>
+                    <cite>via {{ comment.user }}
+                        | {{ comment.timestamp|timesince }} ago
+                        | {% if comment.children.count > 0 %}
+                            {{ comment.children.count }} Comment{% if comment.children.count >= 1 %}s{% endif %}
+                        | {% endif %} <a class="comment-reply-btn" href="#">Reply</a>
+                        | <a href="{% url 'thread' comment.pk %}">Thread</a>
+                        {% if user == comment.user %} | <a href="{% url 'comment_delete' comment.pk %}">Delete</a>{% endif %}
+                    </cite>
+
+                    <div class="comment-reply">
+                        {% for child_comment in comment.children %}
+                            <blockquote class="blockquote ml-5">
+                                <p class="mb-0">
+                                    {{ child_comment.content }}
+                                </p>
+                                <cite>
+                                    via {{ child_comment.user }} | {{ child_comment.timestamp|timesince }} ago
+                                    {% if user == child_comment.user %} | <a href="{% url 'comment_delete' child_comment.pk %}">Delete</a>{% endif %}
+                                </cite>
+                            </blockquote>
+                        {% endfor %}
+
+                        {% if user.is_authenticated %}
+                            <form method="POST" action=".">{% csrf_token %}
+                                {{ comment_form|crispy }}
+                                <input name="parent_id" type="hidden" value="{{ comment.id }}"/>
+                                <input class="btn btn-primary" type="submit" value="Post comment"/>
+                            </form>
+                        {% else %}
+                            <hr/>
+                            <p>
+                                You must login to comment
+                            </p>
+                        {% endif %}
+                    </div>
+
+                </blockquote>
+                <hr/>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}

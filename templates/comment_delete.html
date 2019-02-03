@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+
+{% load crispy_forms_tags %}
+
+
+{% block title %}Confirm delete{% endblock title %}
+
+
+{% block post_detail_link %}
+    {% if object.parent %}
+        <li class="breadcrumb-item active">
+            <a href="{% url 'post_detail' object.parent.content_object.pk %}">{{ object.parent.content_object.title }}</a>
+        </li>
+        <li class="breadcrumb-item active">
+            <a href="{% url 'thread' object.parent.pk %}">Comment thread</a>
+        </li>
+        <li class="breadcrumb-item" aria-current="page">
+            Delete comment
+        </li>
+    {% else %}
+        <li class="breadcrumb-item active">
+            <a href="{% url 'post_detail' object.content_object.pk %}">{{ comment.content_object.title }}</a>
+        </li>
+        <li class="breadcrumb-item active">
+            <a href="{% url 'thread' object.pk %}">Comment thread</a>
+        </li>
+        <li class="breadcrumb-item" aria-current="page">
+            Delete comment
+        </li>
+    {% endif %}
+{% endblock post_detail_link %}
+
+
+{% block content %}
+    <div class="col-sm-6 mx-auto">
+        <h1>Confirm delete</h1>
+        <form method="POST">{% csrf_token %}
+            {{ form|crispy }}
+            <p>
+                Are you sure want to delete '{{ object.content }}'
+            </p>
+            <input class="btn btn-danger" type="submit" value="Confirm"/>
+            <a href="{% if object.parent %}{% url 'thread' object.parent.pk %}{% else %}{% url 'thread' object.pk %}{% endif %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+{% endblock content %}

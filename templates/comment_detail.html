@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+
+{% load crispy_forms_tags %}
+
+
+{% block post_detail_link %}
+<li class="breadcrumb-item active">
+    <a href="{% url 'post_detail' comment.content_object.pk %}">{{ comment.content_object.title }}</a>
+</li>
+<li class="breadcrumb-item" aria-current="page">
+    Comment thread
+</li>
+{% endblock post_detail_link %}
+
+
+{% block content %}
+    <div class="col-sm-6 mx-auto">
+        <p>
+            {{ comment.content }}
+        </p>
+        <cite>via {{ comment.user }}
+            | {{ comment.timestamp|timesince }} ago
+            | {% if comment.children.count > 0 %}
+            {{ comment.children.count }} Comment{% if comment.children.count >= 1 %}s{% endif %}
+            {% endif %}
+            {% if user == comment.user %} <a href="{% url 'comment_delete' comment.pk %}">Delete</a>{% endif %}
+        </cite>
+
+        <hr/>
+
+        <div>
+            {% for child_comment in comment.children %}
+                <blockquote class="blockquote ml-5">
+                    <p class="mb-0">
+                        {{ child_comment.content }}
+                    </p>
+                    <cite>
+                        via {{ child_comment.user }} | {{ child_comment.timestamp|timesince }} ago
+                        {% if user == child_comment.user %} <a href="{% url 'comment_delete' child_comment.pk %}">Delete</a>{% endif %}
+                    </cite>
+                </blockquote>
+            {% endfor %}
+
+            {% if user.is_authenticated %}
+                <form method="POST" action=".">{% csrf_token %}
+                    {{ comment_form|crispy }}
+                    <input name="parent_id" type="hidden" value="{{ comment.id }}"/>
+                    <input class="btn btn-primary" type="submit" value="Post comment"/>
+                </form>
+            {% else %}
+                {% if comment.children %}
+                    <hr/>
+                {% endif %}
+                <p>
+                    You must login to comment
+                </p>
+            {% endif %}
+        </div>
+        <hr/>
+    </div>
+{% endblock content %}

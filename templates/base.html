@@ -1,0 +1,114 @@
+{% load staticfiles %}
+
+
+<!doctype html>
+<html>
+    <head>
+        <title>{% block title %}TryDjango blog{% endblock title %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+        {% block head_extra %}{% endblock head_extra %}
+    </head>
+    <body>
+        <div id="fb-root"></div>
+        <script>(function(d, s, id) {
+             var js, fjs = d.getElementsByTagName(s)[0];
+             if (d.getElementById(id)) return;
+             js = d.createElement(s); js.id = id;
+             js.src = 'https://connect.facebook.net/ru_RU/sdk.js#xfbml=1&version=v3.2';
+             fjs.parentNode.insertBefore(js, fjs);
+         }(document, 'script', 'facebook-jssdk'));</script>
+        
+
+        <div class="container">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active">
+                    <a href="{% url 'post_list' %}">Home</a>
+                </li>
+                {% block post_detail_link %}
+                {% endblock post_detail_link %}
+
+                {% if not user.is_authenticated %}
+                <li class="breadcrumb-item active ml-auto">
+                    <a href="{% url 'signup' %}">Register</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    <a href="{% url 'login' %}">Login</a>
+                </li>
+                {% else %}
+                <li class="breadcrumb-item ml-auto">
+                    {{ user }}
+                </li>
+                <li class="breadcrumb-item active">
+                    <a href="{% url 'logout' %}">Logout</a>
+                </li>
+                {% endif %}
+            </ol>
+
+            {% block content %}
+            {% endblock content %}
+        </div>
+
+        <script
+            src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.6.0/marked.js"></script>
+        <script type="text/javascript">
+         $(document).ready(function(){
+             $(".content-markdown").each(function(){
+                 var content = $(this).text()
+                 console.log(content)
+                 var markedContent = marked(content)
+                 console.log(markedContent)
+                 $(this).html(markedContent)
+             })
+
+             $(".post-detail-item img").each(function(){
+                 $("img").addClass("img-fluid")
+             })
+
+             // ==============================================
+
+             var contentInput = $('#id_content')
+
+             function setContent(value){
+                 var markedContent = marked(value)
+                 $('#preview-content').html(markedContent)
+                 $('#preview-content img').each(function(){
+                     $(this).addClass('img-fluid')
+                 })
+             }
+             setContent(contentInput.val())
+
+             contentInput.keyup(function(){
+                 var newContent = $(this).val()
+                 setContent(newContent)
+             })
+
+             var titleInput = $('#id_title')
+
+             function setTitle(value){
+                 $('#preview-title').text(value)
+             }
+             setTitle(titleInput.val())
+
+             titleInput.keyup(function(){
+                 var newTitle = $(this).val()
+                 setTitle(newTitle)
+             })
+
+             // ==========================================
+
+             $('.comment-reply-btn').click(function(event){
+                 event.preventDefault()
+                 $(this).parent().next('.comment-reply').fadeToggle();
+             })
+         })
+         </script>
+    </body>
+</html>

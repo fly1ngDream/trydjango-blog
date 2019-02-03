@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+
+{% block title %}TryDjango blog{% endblock title %}
+
+
+{% block content%}
+        <div class="col-sm-6 mx-auto mt-1">
+            <form method="get" class="row">
+                <div class="input-group">
+                    <input class="form-control" type="text" name="q" placeholder="Search posts" value="{{ request.GET.q }}" />
+                    <span class="input-group-prepend">
+                        <button class="btn btn-info" type="submit"><i class="fa fa-search"></i></button>
+                    </span>
+                </div>
+            </form>
+        </div>
+        <br/>
+        {% if object_list %}
+            {% for post in object_list %}
+                <div class="col-sm-6 mx-auto post-detail-item img-thumbnail">
+                    <div class="img-caption">
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" class="img-fluid" />
+                        {% endif %}
+                        <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a> <small>{{ post.timestamp|timesince }} ago</small></h3>
+                        <p>
+                            Author: {{ post.user }}
+                        </p>
+                        {{ post.get_markdown|linebreaks|truncatewords_html:5 }}
+                        <p><a href="{{ post.get_absolute_url }}" class="btn btn-primary" role="button">View</a></p>
+                    </div>
+                </div>
+                <hr/>
+            {% endfor %}
+        {% else %}
+                <p>
+                    No posts were found.
+                </p>
+        {% endif %}
+
+
+        {% if is_paginated %}
+            <div class="pagination">
+                <span class="page-links mx-auto">
+                    {% if page_obj.has_previous %}
+                    <a href="/posts?page={{ page_obj.previous_page_number }}&q={% if request.GET.q %}{{ request.GET.q }}{% endif %}">previous</a>
+                    {% endif %}
+                    <span class="page-current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+                    {% if page_obj.has_next %}
+                    <a href="/posts?page={{ page_obj.next_page_number }}&q={% if request.GET.q %}{{ request.GET.q }}{% endif %}">next</a>
+                    {% endif %}
+                </span>
+            </div>
+        {% endif %}
+{% endblock content %}
