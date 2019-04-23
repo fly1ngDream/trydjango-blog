@@ -12,6 +12,7 @@ urllib3 = "*"
 django-pagedown = "*"
 django-markdown-deux = "*"
 django-crispy-forms = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.7"
